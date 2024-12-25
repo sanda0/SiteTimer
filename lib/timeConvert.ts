@@ -19,4 +19,10 @@ function getToday(): string {
   return today.toLocaleDateString('en-US', options);
 }
 
-export { convertMinutesToHoursAndMinutes,getToday };
+ function getTodayWeekDay(): string {
+  const today = new Date(); // Get the current date
+  const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  return weekdays[today.getDay()]; // Get today's weekday name
+}
+
+export { convertMinutesToHoursAndMinutes,getToday,getTodayWeekDay };

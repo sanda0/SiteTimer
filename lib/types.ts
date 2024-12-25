@@ -7,3 +7,12 @@ export type WebSiteListItem = {
   spentTime:number;
   timer:number
 }
+
+export type WebSiteData = {
+  avatar:string;
+  webName:string;
+  timer:number;
+}
+
+export type WebSiteDataList = WebSiteData[]
+
