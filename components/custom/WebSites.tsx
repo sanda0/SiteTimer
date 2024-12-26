@@ -7,6 +7,7 @@ import { convertMinutesToHoursAndMinutes, getToday, getTodayWeekDay } from "@/li
 import { Button } from "../ui/button";
 import { Hourglass } from "lucide-react";
 import { getWebSiteDataFromWeekDay } from "@/lib/funcs";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 
 
@@ -41,11 +42,13 @@ const WebSites: React.FC = () => {
             <div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <img
-                    src={web.avatar}
-                    alt="avatar"
-                    className="w-6 h-6 mr-2 rounded-full"
-                  />
+
+                  <Avatar className="mr-2 bg-gray-300 w-7 h-7">
+                    <AvatarImage src={web.avatar}  ></AvatarImage>
+                    <AvatarFallback className="font-weight-bold">
+                      {web.webName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <span className="text-sm font-medium">{web.webName}</span>
                     <br />
