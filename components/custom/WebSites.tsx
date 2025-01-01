@@ -6,8 +6,12 @@ import { WebSiteListItem } from "@/lib/types";
 import { convertMinutesToHoursAndMinutes, getToday, getTodayWeekDay } from "@/lib/timeConvert";
 import { Button } from "../ui/button";
 import { Hourglass } from "lucide-react";
-import { getWebSiteDataFromWeekDay } from "@/lib/funcs";
+import { getWebSiteDataFromWeekDay, updateWebSiteTimer } from "@/lib/funcs";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import TimerInput from "./TimerInput";
 
 
 
@@ -15,17 +19,29 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 const WebSites: React.FC = () => {
   const [webSiteList, setWebSiteList] = useState<WebSiteListItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [timer, setTimer] = useState<number>(0);
+
+  async function saveTimer(url: string) {
+    console.log('Saving Timer:', timer);
+    // Save the timer value to the storage
+    updateWebSiteTimer(url, timer).then(() => {
+      console.log('Timer saved successfully');
+      fetchData();
+    })
+  }
+
+  async function fetchData() {
+    setLoading(true);
+    const today = getTodayWeekDay(); // Get today's weekday name
+    console.log(today);
+    const data = await getWebSiteDataFromWeekDay(today); // Fetch data
+    setWebSiteList(data);
+    setLoading(false);
+    console.log(data);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const today = getTodayWeekDay(); // Get today's weekday name
-      console.log(today);
-      const data = await getWebSiteDataFromWeekDay(today); // Fetch data
-      setWebSiteList(data);
-      setLoading(false);
-      console.log(data);
-    };
+
     fetchData();
   }, []);
 
@@ -59,9 +75,25 @@ const WebSites: React.FC = () => {
                   </div>
                 </div>
                 <div className="flex items-center">
-                  <Button variant="outline" size="icon">
-                    <Hourglass size={24} />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Hourglass size={24} />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="w-[200px]">
+                      <DialogHeader>
+                        <DialogTitle>Set Timer</DialogTitle>
+                      </DialogHeader>
+                      <div>
+                        <TimerInput time={web.timer} onTimeChange={setTimer} />
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" onClick={() => saveTimer(web.webName)}>Save</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
                 </div>
               </div>
             </div>

@@ -1,5 +1,15 @@
 import { addWebSiteDataToWeekDay, storeWebsiteData } from "@/lib/funcs";
 
+const intervalList: any = {};
+type TabTimeData = {
+  startTime: number;
+  totalTime: number;
+};
+
+const tabTimeMap: Record<string, TabTimeData> = {};
+let currentTabId: number | null = null;
+let isWindowFocused = true;
+
 export default defineBackground(() => {
 
   function getCurrentWebsiteData(): void {
@@ -24,22 +34,25 @@ export default defineBackground(() => {
         return;
       }
 
-      if(url.includes('chrome://') || url.includes('chrome-extension://')) {
+      if (url.includes('chrome://') || url.includes('chrome-extension://')) {
         console.log('Ignoring internal chrome pages');
         return;
       }
 
-      if(url.includes('localhost')) {
+      if (url.includes('localhost')) {
         console.log('Ignoring localhost');
         return;
       }
 
-      if(url === 'newtab') {
+      if (url === 'newtab') {
         console.log('Ignoring newtab');
         return;
       }
 
       storeWebsiteData(url, { avatar: favicon, webName: url, timer: 0 });
+
+
+
 
       addWebSiteDataToWeekDay({
         avatar: favicon,
@@ -48,8 +61,26 @@ export default defineBackground(() => {
         timer: 0
       })
 
+
+
     });
   }
+
+
+
+  ///// traking the current website data
+
+
+
+
+
+  // Debugging: Log total time spent on tabs
+  setInterval(() => {
+    console.log("Tab Time Data:");
+  }, 1000);
+
+
+
 
 
   //init calls

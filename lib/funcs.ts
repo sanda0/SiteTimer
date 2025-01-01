@@ -78,3 +78,49 @@ export function getWebSiteDataFromWeekDay(weekday: string): Promise<WebSiteListI
     });
   });
 }
+
+
+export function updateWebSiteTimer(url: string, timer: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Get existing data from storage
+      chrome.storage.local.get(url, (result) => {
+        const existingData = result[url] || {};
+
+        // Merge existing data with new data
+        const updatedData: WebSiteData = {
+          ...existingData,
+          timer,
+        };
+
+        // Save updated data to storage
+        chrome.storage.local.set({ [url]: updatedData }, () => {
+          console.log(`Timer for ${url} updated:`, updatedData);
+
+          // Update the timer in the weekday data
+          const weekday = getTodayWeekDay();
+          chrome.storage.local.get(weekday, (result) => {
+            const existingWeekData = result[weekday] || [];
+            const updatedWeekData = existingWeekData.map((item: WebSiteListItem) => {
+              if (item.webName === url) {
+                return {
+                  ...item,
+                  timer,
+                };
+              }
+              return item;
+            });
+
+            chrome.storage.local.set({ [weekday]: updatedWeekData }, () => {
+              console.log(`Timer for ${url} in ${weekday} updated:`, updatedWeekData);
+              resolve();
+            });
+          });
+        });
+      });
+    } catch (error) {
+      console.error("Failed to update website timer:", error);
+      reject(error);
+    }
+  });
+}
