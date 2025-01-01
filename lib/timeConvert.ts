@@ -6,10 +6,13 @@ function convertMinutesToHoursAndMinutes(totalMinutes: number): string {
     return "0 min";
   } else if (hours === 0) {
     return `${minutes} min`;
-  }else if (minutes === 0) {
+  } else if (minutes === 0) {
     return `${hours} hr`;
+  } else if (hours > 0 && minutes > 0) {
+    return `${hours} hr, ${minutes} min`;
+  }else{
+    return "0 min";
   }
-  return `${hours} hr, ${minutes} min`;
 }
 
 
@@ -19,10 +22,10 @@ function getToday(): string {
   return today.toLocaleDateString('en-US', options);
 }
 
- function getTodayWeekDay(): string {
+function getTodayWeekDay(): string {
   const today = new Date(); // Get the current date
   const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   return weekdays[today.getDay()]; // Get today's weekday name
 }
 
-export { convertMinutesToHoursAndMinutes,getToday,getTodayWeekDay };
+export { convertMinutesToHoursAndMinutes, getToday, getTodayWeekDay };

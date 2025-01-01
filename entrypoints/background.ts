@@ -1,14 +1,11 @@
-import { addWebSiteDataToWeekDay, storeWebsiteData } from "@/lib/funcs";
+import { addWebSiteDataToWeekDay, storeWebsiteData, updateWebsitesSpendTime } from "@/lib/funcs";
+import { tabTimeMap } from "@/lib/types";
 
-const intervalList: any = {};
-type TabTimeData = {
-  startTime: number;
-  totalTime: number;
-};
 
-const tabTimeMap: Record<string, TabTimeData> = {};
+
+
 let currentTabId: number | null = null;
-let isWindowFocused = true;
+let isWindowFocused = false;
 
 export default defineBackground(() => {
 
@@ -25,12 +22,10 @@ export default defineBackground(() => {
 
       url = new URL(url).hostname.replace(/^www\./, "");
 
-      console.log("Current tab:", tab);
-      console.log("Current URL:", url);
-      console.log("Current Favicon:", favicon);
+
 
       if (!url) {
-        console.error("Invalid URL:", url);
+        // console.error("Invalid URL:", url);
         return;
       }
 
@@ -49,19 +44,14 @@ export default defineBackground(() => {
         return;
       }
 
-      storeWebsiteData(url, { avatar: favicon, webName: url, timer: 0 });
-
-
-
-
-      addWebSiteDataToWeekDay({
-        avatar: favicon,
-        webName: url,
-        spentTime: 0,
-        timer: 0
-      })
-
-
+      storeWebsiteData(url, { avatar: favicon, webName: url, timer: 0 }).then((data) => {
+        addWebSiteDataToWeekDay({
+          avatar: favicon,
+          webName: url,
+          spendTime: 0,
+          timer: data.timer
+        })
+      });
 
     });
   }
@@ -73,22 +63,75 @@ export default defineBackground(() => {
 
 
 
-
-  // Debugging: Log total time spent on tabs
   setInterval(() => {
-    console.log("Tab Time Data:");
+    chrome.windows.getCurrent().then((window) => {
+      isWindowFocused = window.focused;
+    });
   }, 1000);
 
 
+
+  setInterval(() => {
+    if (isWindowFocused) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs.length === 0 || !tabs[0].url) {
+          console.error("No active tab found.");
+          return;
+        }
+
+        const tab = tabs[0];
+        let url = tab.url || "";
+        url = new URL(url).hostname.replace(/^www\./, "");
+        console.log('current tab', url);
+        if (!url) {
+          return;
+        }
+        if (url.includes('chrome://') || url.includes('chrome-extension://')) {
+          return;
+        }
+
+        if (url.includes('localhost')) {
+          return;
+        }
+
+        if (url === 'newtab') {
+          return;
+        }
+
+        tabTimeMap[url] = tabTimeMap[url] + 1 || 0;
+
+      });
+    }
+  }, 1000);
+
+  setInterval(() => {
+    for (const [url, time] of Object.entries(tabTimeMap)) {
+      const roundedTime = Math.round(time / 60);
+      const remainingTime = time % 60;
+
+      tabTimeMap[url] = remainingTime;
+
+      console.log('url', url, 'time', time, 'roundedTime', roundedTime);
+      updateWebsitesSpendTime(url, roundedTime);
+    }
+  }, 1000 * 60)
 
 
 
   //init calls
 
-  chrome.tabs.onActivated.addListener(getCurrentWebsiteData);
+  chrome.tabs.onActivated.addListener((info) => {
+    getCurrentWebsiteData();
+    console.log('tab activated', info);
+  });
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete') {
       getCurrentWebsiteData();
     }
+    console.log('tab updated', tabId, changeInfo.status);
+  });
+
+  chrome.windows.onFocusChanged.addListener((windowId) => {
+    console.log('window focus changed', windowId);
   });
 });

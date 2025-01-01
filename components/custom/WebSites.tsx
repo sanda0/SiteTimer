@@ -69,7 +69,7 @@ const WebSites: React.FC = () => {
                     <span className="text-sm font-medium">{web.webName}</span>
                     <br />
                     <span className="text-xs font-medium text-gray-500">
-                      {convertMinutesToHoursAndMinutes(web.spentTime)} /{" "}
+                      {convertMinutesToHoursAndMinutes(web.spendTime)} /{" "}
                       {convertMinutesToHoursAndMinutes(web.timer)}
                     </span>
                   </div>

@@ -4,7 +4,7 @@
 export type WebSiteListItem = {
   avatar:string;
   webName:string;
-  spentTime:number;
+  spendTime:number;
   timer:number
 }
 
@@ -16,3 +16,5 @@ export type WebSiteData = {
 
 export type WebSiteDataList = WebSiteData[]
 
+
+export const tabTimeMap: Record<string, number> = {};
