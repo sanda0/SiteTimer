@@ -1,5 +1,5 @@
 import { getTodayWeekDay } from "./timeConvert";
-import { WebSiteData, WebSiteListItem } from "./types";
+import { ChartEntry, WebSiteData, WebSiteListItem } from "./types";
 
 /**
  * Stores website data in Chrome local storage.
@@ -129,14 +129,14 @@ export function updateWebSiteTimer(url: string, timer: number): Promise<void> {
   });
 }
 
-export function updateWebsitesSpendTime(url:string,mins:number):Promise<void>{
-  return new Promise((resolve,reject)=>{
-    try{
+export function updateWebsitesSpendTime(url: string, mins: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    try {
 
       const weekday = getTodayWeekDay();
       chrome.storage.local.get(weekday, (result) => {
         const existingWeekData = result[weekday] || [];
-    
+
         const updatedWeekData = existingWeekData.map((item: WebSiteListItem) => {
           if (item.webName === url) {
             const spendTime = item.spendTime + mins;
@@ -154,9 +154,44 @@ export function updateWebsitesSpendTime(url:string,mins:number):Promise<void>{
         });
       });
 
-    }catch(error){
-      console.error("Failed to update website spend time:",error);
+    } catch (error) {
+      console.error("Failed to update website spend time:", error);
       reject(error);
     }
+  })
+}
+
+export function getWeekTotalTime(): Promise<ChartEntry[]> {
+  return new Promise((resolve, reject) => {
+    clearWeekData();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const data: ChartEntry[] = [];
+
+    days.forEach(async (day) => {
+      const webSiteList = await getWebSiteDataFromWeekDay(day);
+
+      const totalTime = webSiteList.reduce((acc, web) => acc + web.spendTime, 0);
+      data.push({ day, time: totalTime });
+      if (data.length === 7) {
+        resolve(data);
+      }
+    })
+  })
+}
+
+export function clearWeekData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const today = getTodayWeekDay();
+    if (today === 'Sunday') {
+      days.forEach(async (day) => {
+        chrome.storage.local.remove(day, () => {
+          console.log(`Data for ${day} cleared`);
+        });
+      })
+    }
+
+    resolve();
   })
 }

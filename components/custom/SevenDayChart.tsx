@@ -5,18 +5,16 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
 
 } from "@/components/ui/chart"
+import { ChartEntry } from "@/lib/types";
 
-const chartData = [
-  { day: "Sunday", time: 186 },
-  { day: "Monday", time: 305 },
-  { day: "Tuesday", time: 237 },
-  { day: "Wednesday", time: 73 },
-  { day: "Thursday", time: 209 },
-  { day: "Friday", time: 214 },
-  { day: "Saturday", time: 150 },
-]
+interface SevenDayChartProps {
+  data: ChartEntry[]
+ }
+
 
 const chartConfig = {
   time: {
@@ -25,12 +23,15 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-const SevenDayChart: React.FC = () => {
+const SevenDayChart: React.FC<SevenDayChartProps> = ({data}) => {
+
+
+
   return (
 
     <>
       <ChartContainer config={chartConfig} className="min-h-[100px] max-h-[150px] w-full">
-        <BarChart accessibilityLayer data={chartData}>
+        <BarChart accessibilityLayer data={data}>
           <CartesianGrid vertical={false} />
           <XAxis
             dataKey="day"
@@ -41,7 +42,10 @@ const SevenDayChart: React.FC = () => {
           />
 
           <Bar dataKey="time" fill="var(--color-time)" radius={4} />
-
+          <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent indicator="dashed" />}
+            />
         </BarChart>
       </ChartContainer>
 

@@ -86,7 +86,7 @@ export default defineBackground(() => {
         if (!url) {
           return;
         }
-        if (url.includes('chrome://') || url.includes('chrome-extension://')) {
+        if (url.includes('chrome://') || url.includes('chrome-extension://') || url.includes('chrome://extensions')) {
           return;
         }
 

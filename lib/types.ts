@@ -18,3 +18,9 @@ export type WebSiteDataList = WebSiteData[]
 
 
 export const tabTimeMap: Record<string, number> = {};
+
+
+export type ChartEntry = {
+  day:string;
+  time:number;
+}
