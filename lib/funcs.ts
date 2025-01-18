@@ -1,6 +1,8 @@
 import { getTodayWeekDay } from "./timeConvert";
 import { ChartEntry, WebSiteData, WebSiteListItem } from "./types";
 
+
+
 /**
  * Stores website data in Chrome local storage.
  * @param url - The full URL of the website.
@@ -195,3 +197,44 @@ export function clearWeekData(): Promise<void> {
     resolve();
   })
 }
+
+export   function updateWebsitesSpendTimeBatch(wtt:Record<string, number>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        const weekday = getTodayWeekDay();
+  
+        // Retrieve existing data for today
+        chrome.storage.local.get(weekday, (result) => {
+          const existingWeekData = result[weekday] || [];
+  
+          // Update data in memory
+          const updatedWeekData = existingWeekData.map((item: WebSiteListItem) => {
+            if (wtt[item.webName]) {
+              const spendTime = item.spendTime + wtt[item.webName];
+              delete wtt[item.webName]; // Clear tracked time after updating
+              return { ...item, spendTime };
+            }
+            return item;
+          });
+  
+          // Add any new websites that were not in existing data
+          const newWebsites = Object.entries(wtt).map(([url, mins]) => ({
+            webName: url,
+            spendTime: mins,
+          }));
+          wtt = {}; // Clear batch after updating
+  
+          const finalWeekData = [...updatedWeekData, ...newWebsites];
+  
+          // Save updated data back to storage
+          chrome.storage.local.set({ [weekday]: finalWeekData }, () => {
+            console.log("Website time updated:", finalWeekData);
+            resolve();
+          });
+        });
+      } catch (error) {
+        console.error("Failed to batch update website spend time:", error);
+        reject(error);
+      }
+    });
+  }

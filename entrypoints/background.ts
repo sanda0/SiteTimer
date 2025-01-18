@@ -1,4 +1,4 @@
-import { addWebSiteDataToWeekDay, storeWebsiteData, updateWebsitesSpendTime } from "@/lib/funcs";
+import { addWebSiteDataToWeekDay, storeWebsiteData, updateWebsitesSpendTime,updateWebsitesSpendTimeBatch } from "@/lib/funcs";
 import { tabTimeMap } from "@/lib/types";
 
 
@@ -6,6 +6,11 @@ import { tabTimeMap } from "@/lib/types";
 
 let currentTabId: number | null = null;
 let isWindowFocused = false;
+
+const UPDATE_INTERVAL_MS = 10000; // Update storage every 10 seconds
+const ONE_SECOND_IN_MINUTES = 1 / 60; // Minutes per second
+let isUpdating = false;
+let websiteTimeTracker: Record<string, number> = {};
 
 export default defineBackground(() => {
 
@@ -63,6 +68,7 @@ export default defineBackground(() => {
 
 
 
+
   setInterval(() => {
     chrome.windows.getCurrent().then((window) => {
       isWindowFocused = window.focused;
@@ -70,6 +76,17 @@ export default defineBackground(() => {
   }, 1000);
 
 
+  setInterval(() => {
+    if (isUpdating) return; // Prevent overlapping updates
+    isUpdating = true;
+  
+    updateWebsitesSpendTimeBatch(websiteTimeTracker)
+      .catch((err) => console.error("Batch update error:", err))
+      .finally(() => {
+        isUpdating = false;
+        websiteTimeTracker = {};
+      });
+  }, UPDATE_INTERVAL_MS);
 
   setInterval(() => {
     if (isWindowFocused) {
@@ -83,38 +100,25 @@ export default defineBackground(() => {
         let url = tab.url || "";
         url = new URL(url).hostname.replace(/^www\./, "");
         console.log('current tab', url);
-        if (!url) {
-          return;
-        }
-        if (url.includes('chrome://') || url.includes('chrome-extension://') || url.includes('chrome://extensions')) {
-          return;
-        }
-
-        if (url.includes('localhost')) {
-          return;
-        }
-
-        if (url === 'newtab') {
+        if (
+          !url ||
+          url.includes("chrome://") ||
+          url.includes("chrome-extension://") ||
+          url.includes("localhost") ||
+          url === "newtab"
+        ) {
           return;
         }
 
-        tabTimeMap[url] = tabTimeMap[url] + 1 || 0;
+
+        // updateWebsitesSpendTime(url, 0.016666667);
+        websiteTimeTracker[url] = (websiteTimeTracker[url] || 0) + ONE_SECOND_IN_MINUTES;
 
       });
     }
   }, 1000);
 
-  setInterval(() => {
-    for (const [url, time] of Object.entries(tabTimeMap)) {
-      const roundedTime = Math.round(time / 60);
-      const remainingTime = time % 60;
 
-      tabTimeMap[url] = remainingTime;
-
-      console.log('url', url, 'time', time, 'roundedTime', roundedTime);
-      updateWebsitesSpendTime(url, roundedTime);
-    }
-  }, 1000 * 60)
 
 
 

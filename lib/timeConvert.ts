@@ -1,7 +1,11 @@
 
 function convertMinutesToHoursAndMinutes(totalMinutes: number): string {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  let hours = Math.floor(totalMinutes / 60);
+  let minutes = totalMinutes % 60;
+
+  hours = Math.floor(hours)
+  minutes = Math.floor(minutes)
+
   if (hours === 0 && minutes === 0) {
     return "0 min";
   } else if (hours === 0) {
@@ -10,7 +14,7 @@ function convertMinutesToHoursAndMinutes(totalMinutes: number): string {
     return `${hours} hr`;
   } else if (hours > 0 && minutes > 0) {
     return `${hours} hr, ${minutes} min`;
-  }else{
+  } else {
     return "0 min";
   }
 }
