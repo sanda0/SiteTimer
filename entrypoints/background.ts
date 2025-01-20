@@ -11,6 +11,8 @@ const UPDATE_INTERVAL_MS = 10000; // Update storage every 10 seconds
 const ONE_SECOND_IN_MINUTES = 1 / 60; // Minutes per second
 let isUpdating = false;
 let websiteTimeTracker: Record<string, number> = {};
+let currentWebTimer: number = 0;
+let currentWebSpendTime: number = 0;
 
 export default defineBackground(() => {
 
@@ -55,7 +57,13 @@ export default defineBackground(() => {
           webName: url,
           spendTime: 0,
           timer: data.timer
+        }).then((data2)=>{
+          
+          currentWebTimer = data.timer;
+          currentWebSpendTime = data2.spendTime;
+          
         })
+
       });
 
     });
@@ -99,7 +107,7 @@ export default defineBackground(() => {
         const tab = tabs[0];
         let url = tab.url || "";
         url = new URL(url).hostname.replace(/^www\./, "");
-        console.log('current tab', url);
+        // console.log('current tab', url);
         if (
           !url ||
           url.includes("chrome://") ||
@@ -113,6 +121,16 @@ export default defineBackground(() => {
 
         // updateWebsitesSpendTime(url, 0.016666667);
         websiteTimeTracker[url] = (websiteTimeTracker[url] || 0) + ONE_SECOND_IN_MINUTES;
+        currentWebSpendTime += ONE_SECOND_IN_MINUTES;
+
+        if(currentWebTimer != 0){
+          console.log('currentWebTimer',currentWebTimer);
+          console.log('currentWebSpendTime',currentWebSpendTime);
+          if(currentWebSpendTime > currentWebTimer){
+            console.log(tab.id)
+            chrome.tabs.update(tab.id??0, { url: chrome.runtime.getURL("blockpage.html") });
+          }
+        }
 
       });
     }

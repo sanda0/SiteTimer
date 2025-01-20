@@ -36,44 +36,59 @@ export function storeWebsiteData(url: string, data: WebSiteData): Promise<WebSit
   });
 }
 
-
-
-export function addWebSiteDataToWeekDay(data: WebSiteListItem): void {
-  try {
-    // Get the current weekday
-    const weekday = getTodayWeekDay();
-
-    // Get existing data from storage
-    chrome.storage.local.get(weekday, (result) => {
-      const existingData = result[weekday] || null;
-
-      if (!existingData) {
-        chrome.storage.local.set({ [weekday]: [data] }, () => {
-          // console.log(`Data for ${weekday} updated:`, [data]);
-        });
-        return;
-      }
-
-      for (let i = 0; i < existingData.length; i++) {
-        if (existingData[i].webName === data.webName) {
-          return
-        }
-      }
-
-      // Merge existing data with new data
-      const updatedData: WebSiteListItem[] = [
-        ...(existingData as WebSiteListItem[]),
-        data,
-      ];
-
-      // Save updated data to storage
-      chrome.storage.local.set({ [weekday]: updatedData }, () => {
-        // console.log(`Data for ${weekday} updated:`, updatedData);
-      });
+export function getWebsiteData(url: string): Promise<WebSiteData> {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.get(url, (result) => {
+      const data = result[url] || {};
+      resolve(data as WebSiteData);
     });
-  } catch (error) {
-    console.error("Failed to store website data:", error);
-  }
+  });
+}
+
+
+
+export function addWebSiteDataToWeekDay(data: WebSiteListItem): Promise<WebSiteListItem> {
+  return new Promise((resolve, reject) => {
+    try {
+      // Get the current weekday
+      const weekday = getTodayWeekDay();
+
+      // Get existing data from storage
+      chrome.storage.local.get(weekday, (result) => {
+        const existingData = result[weekday] || null;
+
+        if (!existingData) {
+          chrome.storage.local.set({ [weekday]: [data] }, () => {
+            // console.log(`Data for ${weekday} updated:`, [data]);
+            resolve(data);
+          });
+          return;
+        }
+
+        for (let i = 0; i < existingData.length; i++) {
+          if (existingData[i].webName === data.webName) {
+            resolve(existingData[i]);
+            return;
+          }
+        }
+
+        // Merge existing data with new data
+        const updatedData: WebSiteListItem[] = [
+          ...(existingData as WebSiteListItem[]),
+          data,
+        ];
+
+        // Save updated data to storage
+        chrome.storage.local.set({ [weekday]: updatedData }, () => {
+          // console.log(`Data for ${weekday} updated:`, updatedData);
+          resolve(data);
+        });
+      });
+    } catch (error) {
+      console.error("Failed to store website data:", error);
+      reject(error);
+    }
+  });
 }
 
 export function getWebSiteDataFromWeekDay(weekday: string): Promise<WebSiteListItem[]> {
