@@ -1,9 +1,24 @@
-# ⏳ SiteTimer
-### Take control of your web browsing! 
-[Add To Chrome](https://chromewebstore.google.com/detail/sitetimer/obcegchiickbhkkeeclcgjnejgjnkobg?authuser=0&hl=en)
+# SiteTimer ⏱️🚀  
 
-![Add a heading (1)](https://github.com/user-attachments/assets/02978ca9-644a-4599-b9c8-9d63ad3e337b)
+**Take control of your web browsing!**  
 
-Track time spent on each website ⏱️, set daily limits, and block access once time’s up 🚫. Stay productive with 7-day browsing history 📊 and manage your online habits effectively. Perfect for focus, productivity, or reducing distractions! 🚀 Try SiteTimer today and reclaim your time! ✨
+
+SiteTimer is a browser extension designed to help you:  
+✅ Track time spent on each website  
+✅ Set daily limits and block access once time’s up  
+✅ View a 7-day browsing history for better insights  
+✅ Improve focus and reduce distractions  
+
+## Features  
+- ⏳ **Time Tracking** – Monitor your browsing habits  
+- 🔒 **Website Blocking** – Set daily limits and restrict access  
+- 📊 **Browsing History** – Review usage trends over the past week  
+- 🎯 **Stay Productive** – Optimize your online activities  
+
+## Installation  
+[Add To Chrome](https://chromewebstore.google.com/detail/sitetimer/obcegchiickbhkkeeclcgjnejgjnkobg?authuser=0&hl=en) 
+
+## Contribute  
+Feel free to fork this repo and suggest improvements. PRs are welcome!  
 
 
